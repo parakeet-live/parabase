@@ -1,0 +1,11 @@
+﻿{
+    "name": "parabase/parabase",
+    "require": {
+        "altorouter/altorouter": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "parabase\\": "private/lib/parabase/"
+        }
+    }
+}
