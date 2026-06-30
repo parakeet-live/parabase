@@ -2,53 +2,63 @@
 
 namespace parabase;
 
-/*
- * usage:
- *   Database::singleton()->run("SELECT * FROM posts")->fetchAll(PDO::FETCH_OBJ);
- *   Database::singleton()->run("SELECT * FROM posts WHERE id = :id", [":id" => $id])->fetch(PDO::FETCH_OBJ);
- *   Database::singleton()->run("INSERT INTO posts (title) VALUES (:t)", [":t" => $title]);
- *   Database::singleton()->lastInsertId();
- */
-class Database
+use PDO;
+use PDOStatement;
+
+final class Database
 {
-    private static ?self $instance = null;
-    public \PDO $pdo;
+    private static ?Database $instance = null;
 
-    public static function singleton(): self
-    {
-        if (!self::$instance) {
-            self::$instance = new Database();
-        }
-        return self::$instance;
+    private static string $dsn;
+    private static string $username;
+    private static string $password;
+
+    private ?PDO $pdo = null;
+
+    private function __construct() {
+        $c = \CONFIG["database"];
+        self::$dsn = "mysql:host={$c['host']};dbname={$c['name']};charset=utf8mb4";
+        self::$username = $c["username"];
+        self::$password = $c["password"];
     }
 
-    function __construct()
-    {
-        $this->pdo = new \PDO(
-            "mysql:host=" . \CONFIG["database"]["host"] . ";dbname=" . \CONFIG["database"]["name"] . ";charset=utf8mb4",
-            \CONFIG["database"]["username"],
-            \CONFIG["database"]["password"]
-        );
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $this->pdo->setAttribute(\PDO::ATTR_PERSISTENT, true);
+    public static function singleton(): Database {
+        return self::$instance ??= new self();
     }
 
-    function run(string $sql, array $args = null): \PDOStatement
-    {
-        if (!$args) return $this->pdo->query($sql);
-
-        $stmt = $this->pdo->prepare($sql);
-        foreach ($args as $param => $value) {
-            // pdo positional params are 1-based
-            $idx = is_int($param) ? $param + 1 : $param;
-            $stmt->bindValue($idx, $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+    private function connection(): PDO {
+        if ($this->pdo !== null) {
+            return $this->pdo;
         }
+
+        return $this->pdo = new PDO(self::$dsn, self::$username, self::$password, [
+            PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_PERSISTENT => true,
+        ]);
+    }
+
+    public function run(string $sql, array $params = []): PDOStatement {
+        $db = $this->connection();
+
+        if ($params === []) {
+            return $db->query($sql);
+        }
+
+        $stmt = $db->prepare($sql);
+        $this->bindAll($stmt, $params);
         $stmt->execute();
+
         return $stmt;
     }
 
-    function lastInsertId(): string
-    {
-        return $this->pdo->lastInsertId();
+    private function bindAll(PDOStatement $stmt, array $params): void {
+        foreach ($params as $key => $val) {
+            $slot = is_int($key) ? $key + 1 : $key;
+            $stmt->bindValue($slot, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+    }
+
+    public function lastInsertId(): string {
+        return $this->connection()->lastInsertId();
     }
 }
