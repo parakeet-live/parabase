@@ -70,6 +70,7 @@ foreach(CONFIG["auth"]["cookies"] as $cookie){
 
 		if(!defined('SESSION')) {
 			define('SESSION', new Session($validated->session_key, $user, $validated->csrf));
+			break;
 		}
 	} 
 }
