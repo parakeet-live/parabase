@@ -39,7 +39,6 @@ try {
 		"mysql:host=" . CONFIG['database']['host'] . ";  
 		dbname=" . CONFIG['database']['name'], CONFIG['database']['username'], CONFIG['database']['password']
 	); 
-	global $conn;
 
 	$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	$conn->setAttribute(\PDO::ATTR_PERSISTENT, true);
@@ -56,19 +55,17 @@ foreach(CONFIG["auth"]["cookies"] as $cookie){
 	$val = str_replace(".", "_", $cookie);
 	if(isset($_COOKIE[$val])){
 		$validated = Sessions::Validate($_COOKIE[$val]);
-		
-		// i did this change cuz of nesting issues :P
 
 		if(!$validated) {
 			undefineSESSION($cookie);
-			break;
+			continue;
 		}
 
 		$user = User::fromID($validated->user_id);
 
 		if (!$user) {
 			undefineSESSION($cookie);
-			break;
+			continue;
 		}
 
 		if(!defined('SESSION')) {
