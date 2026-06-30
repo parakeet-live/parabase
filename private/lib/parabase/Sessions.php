@@ -3,7 +3,7 @@ namespace parabase;
 use parabase\Database;
 
 class Sessions {
-    public static function New(int $id) {
+    public static function New(int $id): bool|string {
         $key = bin2hex(random_bytes(256));
         $csrf = bin2hex(random_bytes(256));
         try {
@@ -27,8 +27,10 @@ class Sessions {
                     'samesite' => 'Strict'
                 ]);
             }
+            return $key;
         } catch (\Exception $e) {
             error_log("Erm... Error in the Sessions.php script! The following failed: " . $e);
+            return false;
         }
     }
 
