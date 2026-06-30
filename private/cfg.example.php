@@ -21,6 +21,7 @@ define('CONFIG', [
     "auth" => [
         // names of the cookies that have a session key
         "cookies" => ["SITENAMEAUTH"],
+        "timeout" => 86400 * 30,
     ],
 
 ]);
