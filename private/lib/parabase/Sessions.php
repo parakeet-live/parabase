@@ -2,6 +2,8 @@
 
 namespace parabase;
 
+use parabase\Database;
+
 final class Sessions
 {
     private const TTL_CACHE = 300;
