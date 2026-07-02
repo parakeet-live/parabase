@@ -18,6 +18,12 @@ define('CONFIG', [
         "password" => "secret",
     ],
 
+    "redis" => [
+       "host"     => "127.0.0.1",
+       "port"     => 6379,
+       "password" => null,
+    ],
+
     "auth" => [
         // names of the cookies that have a session key
         "cookies" => ["SITENAMEAUTH"],
