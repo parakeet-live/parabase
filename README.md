@@ -7,7 +7,8 @@ A PHP 8.1 web framework starter that's designed to be light and easy to build on
 ## Requirements
 
 - PHP 8.1+
-- (Preferrably) MariaDB or MySQL
+- (Preferrably) MariaDB or MySQL,
+- (Optionally) Redis,
 - Apache with `mod_rewrite` enabled, or you can use nginx (you'd want to remove the .htaccess file though)
 - [Composer](https://getcomposer.org/), for it's autoload functionality
 
